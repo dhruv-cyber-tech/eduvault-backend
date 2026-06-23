@@ -5,6 +5,7 @@ import com.eduvault.backend.model.Resource;
 import com.eduvault.backend.repository.ResourceRepository;
 import com.eduvault.backend.repository.SubjectRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.List;
@@ -18,36 +19,36 @@ public class DashboardService {
 
     public DashboardStatsDto getStats() {
 
-        // total resources
         long totalResources = resourceRepository.count();
-
-        // total subjects
         long totalSubjects = subjectRepository.count();
 
-        // resources by subject
-        List<DashboardStatsDto.SubjectStats> bySubject = List.of(
-                new DashboardStatsDto.SubjectStats("Maths",
-                        resourceRepository.countBySubjectId(4L)),
-                new DashboardStatsDto.SubjectStats("English",
-                        resourceRepository.countBySubjectId(3L)),
-                new DashboardStatsDto.SubjectStats("Gujarati",
-                        resourceRepository.countBySubjectId(1L))
-        );
+        List<DashboardStatsDto.SubjectStats> bySubject = subjectRepository
+                .findAll()
+                .stream()
+                .map(subject -> new DashboardStatsDto.SubjectStats(
+                        subject.getName(),
+                        resourceRepository.countBySubjectId(subject.getId())))
+                .filter(s -> s.getCount() > 0)
+                .toList();
 
-        // resources by type
         List<DashboardStatsDto.TypeStats> byType = Arrays.stream(
                         Resource.ResourceType.values())
                 .map(type -> new DashboardStatsDto.TypeStats(
                         type.name(),
                         resourceRepository.countByResourceType(type)))
+                .filter(t -> t.getCount() > 0)
                 .toList();
+
+        List<Resource> recentUploads = resourceRepository
+                .findRecentUploads(PageRequest.of(0, 5));
 
         return new DashboardStatsDto(
                 totalResources,
-                totalResources, // simplified for now
+                totalResources,
                 totalSubjects,
                 bySubject,
-                byType
+                byType,
+                recentUploads
         );
     }
 }

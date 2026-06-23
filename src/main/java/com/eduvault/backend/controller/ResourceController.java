@@ -2,6 +2,7 @@ package com.eduvault.backend.controller;
 
 import com.eduvault.backend.dto.response.ApiResponse;
 import com.eduvault.backend.model.Resource;
+import com.eduvault.backend.service.FileStorageService;
 import com.eduvault.backend.service.ResourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.UrlResource;
@@ -23,6 +24,7 @@ import java.util.List;
 public class ResourceController {
 
     private final ResourceService resourceService;
+    private final FileStorageService fileStorageService;
 
     // GET /api/resources?standardId=1&subjectId=2&search=algebra
     @GetMapping
@@ -82,39 +84,25 @@ public class ResourceController {
 
     // GET /api/resources/1/download
     @GetMapping("/{id}/download")
-    public ResponseEntity<org.springframework.core.io.Resource> downloadResource(
-            @PathVariable Long id) throws MalformedURLException {
-
+    public ResponseEntity<Void> downloadResource(
+            @PathVariable Long id) {
         Resource resource = resourceService.getResourceById(id);
-        Path filePath = resourceService.getFilePath(resource.getFilePath());
-
-        org.springframework.core.io.Resource fileResource =
-                new UrlResource(filePath.toUri());
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_PDF)
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + resource.getFileName() + "\"")
-                .body(fileResource);
+        String url = fileStorageService.getDownloadUrl(resource.getFilePath());
+        return ResponseEntity.status(302)
+                .header("Location", url)
+                .build();
     }
 
-    // GET /api/resources/1/preview
+
     @GetMapping("/{id}/preview")
-    public ResponseEntity<org.springframework.core.io.Resource> previewResource(
-            @PathVariable Long id) throws MalformedURLException {
-
+    public ResponseEntity<Void> previewResource(
+            @PathVariable Long id) {
         Resource resource = resourceService.getResourceById(id);
-        Path filePath = resourceService.getFilePath(resource.getFilePath());
-
-        org.springframework.core.io.Resource fileResource =
-                new UrlResource(filePath.toUri());
-
-        // inline = opens in browser
-        // attachment = downloads the file
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_PDF)
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=\"" + resource.getFileName() + "\"")
-                .body(fileResource);
+        String url = fileStorageService.getDownloadUrl(resource.getFilePath());
+        // add fl_inline to force browser to display instead of download
+//        url = url.replace("/upload/", "/upload/fl_inline/");
+        return ResponseEntity.status(302)
+                .header("Location", url)
+                .build();
     }
 }

@@ -1,5 +1,6 @@
 package com.eduvault.backend.dto.response;
 
+import com.eduvault.backend.model.Resource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ public class DashboardStatsDto {
     private long totalSubjects;
     private List<SubjectStats> resourcesBySubject;
     private List<TypeStats> resourcesByType;
+    private List<Resource> recentUploads;
 
     @Data
     @AllArgsConstructor
