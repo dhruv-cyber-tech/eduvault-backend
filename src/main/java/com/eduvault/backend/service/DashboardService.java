@@ -7,6 +7,9 @@ import com.eduvault.backend.repository.SubjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,6 +24,12 @@ public class DashboardService {
 
         long totalResources = resourceRepository.count();
         long totalSubjects = subjectRepository.count();
+
+        // Calculate the first day of the current month
+        LocalDateTime startOfMonth = YearMonth.now().atDay(1).atStartOfDay();
+
+        // Fetch the actual count of resources uploaded this month
+        long thisMonthUploads = resourceRepository.countByCreatedAtAfter(startOfMonth);
 
         List<DashboardStatsDto.SubjectStats> bySubject = subjectRepository
                 .findAll()
@@ -44,7 +53,7 @@ public class DashboardService {
 
         return new DashboardStatsDto(
                 totalResources,
-                totalResources,
+                thisMonthUploads, // Fixed: Now passing the real monthly count!
                 totalSubjects,
                 bySubject,
                 byType,

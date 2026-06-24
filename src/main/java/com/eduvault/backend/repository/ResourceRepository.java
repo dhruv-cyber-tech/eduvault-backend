@@ -37,5 +37,7 @@ public interface ResourceRepository extends JpaRepository<Resource,Long> {
     long countByStandardId(Long standardId);
     long countBySubjectId(Long subjectId);
     long countByResourceType(Resource.ResourceType resourceType);
+    // Add this right below your other countBy... methods
+    long countByCreatedAtAfter(java.time.LocalDateTime date);
 
 }
