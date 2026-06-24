@@ -58,10 +58,10 @@ public class ResourceService {
             Long subjectId, Long chapterId,
             List<String> tagNames,
             MultipartFile file,
-            Long adminUserId) throws IOException {
+            String adminEmail) throws IOException { // Changed to String adminEmail
 
-        // verify admin exists
-        AdminUser adminUser = adminUserRepository.findById(adminUserId)
+        // verify admin exists using the email from the secure JWT token
+        AdminUser adminUser = adminUserRepository.findByEmail(adminEmail)
                 .orElseThrow(() -> new RuntimeException("Admin not found"));
 
         // verify standard exists

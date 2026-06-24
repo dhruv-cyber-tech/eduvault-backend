@@ -5,21 +5,18 @@ import com.eduvault.backend.model.Resource;
 import com.eduvault.backend.service.FileStorageService;
 import com.eduvault.backend.service.ResourceService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
+import java.security.Principal;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/resources")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*") // Fixed for Vercel!
 @RequiredArgsConstructor
 public class ResourceController {
 
@@ -63,12 +60,13 @@ public class ResourceController {
             @RequestParam(required = false) Long chapterId,
             @RequestParam(required = false) List<String> tags,
             @RequestParam MultipartFile file,
-            @RequestParam Long adminUserId) throws IOException {
+            Principal principal) throws IOException { // Replaced adminUserId with Principal
 
+        // Pass principal.getName() (which is the user's email) to the service
         Resource resource = resourceService.uploadResource(
                 title, description, resourceType,
                 standardId, subjectId, chapterId,
-                tags, file, adminUserId);
+                tags, file, principal.getName());
         return ResponseEntity.ok(
                 ApiResponse.success(resource, "Resource uploaded successfully"));
     }
@@ -93,14 +91,11 @@ public class ResourceController {
                 .build();
     }
 
-
     @GetMapping("/{id}/preview")
     public ResponseEntity<Void> previewResource(
             @PathVariable Long id) {
         Resource resource = resourceService.getResourceById(id);
         String url = fileStorageService.getDownloadUrl(resource.getFilePath());
-        // add fl_inline to force browser to display instead of download
-//        url = url.replace("/upload/", "/upload/fl_inline/");
         return ResponseEntity.status(302)
                 .header("Location", url)
                 .build();
