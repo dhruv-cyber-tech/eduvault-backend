@@ -45,7 +45,7 @@ public class Resource {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploaded_by", nullable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "passwordHash"})
     private AdminUser uploadedBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
