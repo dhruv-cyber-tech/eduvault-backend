@@ -53,11 +53,11 @@ public class DashboardService {
 
         return new DashboardStatsDto(
                 totalResources,
-                thisMonthUploads, // Fixed: Now passing the real monthly count!
+                thisMonthUploads,
                 totalSubjects,
                 bySubject,
                 byType,
-                recentUploads
+                List.of()
         );
     }
 }
