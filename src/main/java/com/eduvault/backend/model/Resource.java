@@ -1,6 +1,6 @@
 package com.eduvault.backend.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -43,33 +43,32 @@ public class Resource {
     @Column(name ="resource_type",nullable = false)
     private ResourceType resourceType;
 
+    // Completely hides your admin details and password hash from the frontend
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploaded_by", nullable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "passwordHash", "createdAt", "username", "email"})
     private AdminUser uploadedBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // Removed lazy loading so your React table can read the names of the standards/subjects
+    @ManyToOne
     @JoinColumn(name = "standard_id", nullable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Standard standard;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "subject_id", nullable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Subject subject;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "chapter_id")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Chapter chapter;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    // Explicitly set to EAGER so the UI can display the tag badges without crashing
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "resource_tag",
             joinColumns = @JoinColumn(name = "resource_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-
     private Set<Tag> tags = new HashSet<>();
 
     @Column(name = "created_at")
