@@ -7,7 +7,6 @@ import com.eduvault.backend.repository.SubjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.Arrays;
@@ -21,14 +20,10 @@ public class DashboardService {
     private final SubjectRepository subjectRepository;
 
     public DashboardStatsDto getStats() {
-
         long totalResources = resourceRepository.count();
         long totalSubjects = subjectRepository.count();
 
-        // Calculate the first day of the current month
         LocalDateTime startOfMonth = YearMonth.now().atDay(1).atStartOfDay();
-
-        // Fetch the actual count of resources uploaded this month
         long thisMonthUploads = resourceRepository.countByCreatedAtAfter(startOfMonth);
 
         List<DashboardStatsDto.SubjectStats> bySubject = subjectRepository
@@ -48,8 +43,19 @@ public class DashboardService {
                 .filter(t -> t.getCount() > 0)
                 .toList();
 
-        List<Resource> recentUploads = resourceRepository
-                .findRecentUploads(PageRequest.of(0, 5));
+        // use DTO instead of Resource to avoid lazy loading
+        List<DashboardStatsDto.RecentUploadDto> recentUploads = resourceRepository
+                .findRecentUploads(PageRequest.of(0, 5))
+                .stream()
+                .map(r -> new DashboardStatsDto.RecentUploadDto(
+                        r.getId(),
+                        r.getTitle(),
+                        r.getSubject().getName(),
+                        r.getStandard().getName(),
+                        r.getResourceType().name(),
+                        r.getCreatedAt()
+                ))
+                .toList();
 
         return new DashboardStatsDto(
                 totalResources,
@@ -57,7 +63,7 @@ public class DashboardService {
                 totalSubjects,
                 bySubject,
                 byType,
-                List.of()
+                recentUploads
         );
     }
 }

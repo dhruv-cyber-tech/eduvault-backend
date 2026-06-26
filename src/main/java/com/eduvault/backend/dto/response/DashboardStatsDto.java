@@ -1,9 +1,9 @@
 package com.eduvault.backend.dto.response;
 
-import com.eduvault.backend.model.Resource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -15,7 +15,7 @@ public class DashboardStatsDto {
     private long totalSubjects;
     private List<SubjectStats> resourcesBySubject;
     private List<TypeStats> resourcesByType;
-    private List<Resource> recentUploads;
+    private List<RecentUploadDto> recentUploads;
 
     @Data
     @AllArgsConstructor
@@ -29,5 +29,16 @@ public class DashboardStatsDto {
     public static class TypeStats {
         private String type;
         private long count;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class RecentUploadDto {
+        private Long id;
+        private String title;
+        private String subjectName;
+        private String standardName;
+        private String resourceType;
+        private LocalDateTime createdAt;
     }
 }
